@@ -1,4 +1,4 @@
-from keras.layers import Add, Conv2D, Input, Lambda, Activation
+from keras.layers import Add, Conv2D, Input, Lambda, Activation, Concatenate
 from keras.models import Model
 import numpy as np
 import tensorflow as tf
@@ -25,7 +25,6 @@ def merge(scale, num_filters=128, num_res_blocks=16, res_block_scaling=None, tan
     b = Conv2D(num_filters, 3, padding='same')(b)
     for i in range(num_res_blocks):
         b = res_block(b, num_filters, res_block_scaling)
-    #b = Conv2D(num_filters, 3, padding='same')(b)
     x = Add()([x, b, a])
     x = upsample(x, scale, num_filters)
     x = Conv2D(3, 3, padding='same')(x)
@@ -37,7 +36,7 @@ def merge(scale, num_filters=128, num_res_blocks=16, res_block_scaling=None, tan
 #     else:
 #         x = Denormalization()(x)
 
-    return Model(x_in, x, name="edsr")
+    return Model([x_in,x_mask], x)
 
 def res_block(x_in, filters, scaling):
 
