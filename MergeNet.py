@@ -14,27 +14,28 @@ def Normalization(rgb_mean=DIV2K_RGB_MEAN, **kwargs):
 def Denormalization(rgb_mean=DIV2K_RGB_MEAN, **kwargs):
     return Lambda(lambda x: x * 127.5 + rgb_mean, **kwargs)
 
-def merge(scale, num_filters=64, num_res_blocks=8, res_block_scaling=None, tanh_activation=False):
+def merge(scale, num_filters=128, num_res_blocks=16, res_block_scaling=None, tanh_activation=False):
     x_in = Input(shape=(None, None, 3))
     x_mask = Input(shape=(None,None,1))
-    x = Normalization()(x_in)
+    #x = Normalization()(x_in)
+    x = b = Concatenate(axis= -1)([x_in, x_mask])
     
-    
-
-    x = b = Conv2D(num_filters, 3, padding='same')(x)
+    a = Conv2D(numfilters,3,padding='same')(x_mask)
+   
+    b = Conv2D(num_filters, 3, padding='same')(b)
     for i in range(num_res_blocks):
         b = res_block(b, num_filters, res_block_scaling)
-    b = Conv2D(num_filters, 3, padding='same')(b)
-    x = Add()([x, b])
+    #b = Conv2D(num_filters, 3, padding='same')(b)
+    x = Add()([x, b, a])
     x = upsample(x, scale, num_filters)
     x = Conv2D(3, 3, padding='same')(x)
 
-    if tanh_activation:
-        x = Activation('tanh')(x)
-        x = Denormalization_m11()(x)
+#     if tanh_activation:
+#         x = Activation('tanh')(x)
+#         x = Denormalization_m11()(x)
 
-    else:
-        x = Denormalization()(x)
+#     else:
+#         x = Denormalization()(x)
 
     return Model(x_in, x, name="edsr")
 
