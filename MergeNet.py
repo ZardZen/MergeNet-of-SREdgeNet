@@ -18,14 +18,14 @@ def merge(scale, num_filters=128, num_res_blocks=16, res_block_scaling=None, tan
     x_in = Input(shape=(None, None, 3))
     x_mask = Input(shape=(None,None,1))
     #x = Normalization()(x_in)
-    x = b = Concatenate(axis= -1)([x_in, x_mask])
+    b = Concatenate(axis= -1)([x_in, x_mask])
     
     a = Conv2D(numfilters,3,padding='same')(x_mask)
    
-    b = Conv2D(num_filters, 3, padding='same')(b)
+    c = b = Conv2D(num_filters, 3, padding='same')(b)
     for i in range(num_res_blocks):
         b = res_block(b, num_filters, res_block_scaling)
-    x = Add()([x, b, a])
+    x = Add()([c, b, a])
     x = upsample(x, scale, num_filters)
     x = Conv2D(3, 3, padding='same')(x)
 
